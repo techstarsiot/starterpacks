@@ -1,0 +1,34 @@
+{
+    "company": "demo.company",
+    "table":   "operations",
+    "null":    "",
+    "schema": {
+        "id": {
+            "type": "Integer",
+            "nullable":  "false",
+            "indexable": "true",
+            "primary":   "true"
+        },
+        "latitude": {
+            "type": "Float",
+            "nullable":  "true",
+            "indexable": "false",
+            "primary":   "false"
+        },
+        "longitude": {
+            "type": "Float",
+            "nullable":  "true",
+            "indexable": "false",
+            "primary":   "false"
+        },
+        "timestamp": {
+            "type": "Integer",
+            "nullable":  "false",
+            "indexable": "false",
+            "primary":   "false"
+        }
+    },
+    "order": [
+        "id", "latitude", "longitude", "timestamp"
+    ]
+}
