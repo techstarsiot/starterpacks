@@ -1,0 +1,7 @@
+
+source ${HOME}/installers/config_base.sh
+source ${HOME}/installers/config_core.sh
+source ${HOME}/installers/config_spark.sh
+source ${HOME}/installers/postproc_core.sh
+source ${HOME}/installers/postproc_spark.sh
+
