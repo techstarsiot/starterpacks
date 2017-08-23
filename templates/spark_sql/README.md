@@ -7,30 +7,32 @@
 
 ### Installation
 - Sync this repository
-- Pull Image via Docker
-- Run Script to mount host directory to attach volume to executing container
+- Usage Installer Scripts or AMI
+
+### AMI
+- TBD
 
 ### Usage
 ```sh
 # perform in-memory cache + write/read back from S3 + convert to Pandas
 # override default name of output directory/file to S3
 # override default path to S3 (S3a)
-spark-submit sparksql_workflow.py -bn test.vendors -bp akamlani.vendors.techstars.iot/vendors/scienceboy
+spark-submit sparksql_workflow.py -bn techstars.iot.dev -bp data
 ```
 
 ```sh
 # perform only write/read from S3 without in-memory cache
-spark-submit sparksql_workflow.py -b -bn test.vendors -bp akamlani.vendors.techstars.iot/vendors/scienceboy
+spark-submit sparksql_workflow.py -b -bn techstars.iot.dev -bp data
 ```
 
 ```sh
 # perform sql post query: basic example currently
-spark-submit sparksql_workflow.py --sql "SELECT id, latitude FROM"
+spark-submit sparksql_workflow.py --sql "SELECT id, latitude"
 ```
 
 ```
 # override default src path (or given file name)
-spark-submit sparksql_workflow.py --src "../data/vendors/demo/data/csv"
+spark-submit sparksql_workflow.py --src "s3a://techstars.iot.dev/data/csv/<file name>"
 ```
 
 
@@ -39,7 +41,7 @@ spark-submit sparksql_workflow.py --src "../data/vendors/demo/data/csv"
     - Ingest data
     - Hive In-Memory Cache of Ingested data
     - Write/Read S3
-    - Convert from S3 Parquet File(s) to DataFrame output
+    - Convert from S3 Parquet File(s) to DataFrame or JSON output
 
 #### limitations
 - Singleton `Session Context`, for multiple contexts - requires database per metastore hive table
@@ -51,5 +53,5 @@ spark-submit sparksql_workflow.py --src "../data/vendors/demo/data/csv"
 
 ### History Server
 - For viewing actively running sessions and past sessions
-- Execute `$SPARK_HOME/sbin/start-history-server.sh` at command line (if not already started)
+- Execute `$SPARK_HOME/sbin/start-history-server.sh` at command line (if not already started, dotfiles start by default)
 - http://localhost:18080
