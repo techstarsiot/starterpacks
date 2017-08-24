@@ -1,16 +1,52 @@
 ## Spark SQL In-Memory Cache Benchmark
 
 ### Pre-Requisites
-- Create **data** directory with appropriate csv files at the same level as **src** directory
 - Copy config/credentials.template.yml to config/credentials.yml and fill in AWS Credentials
 - Copy config/schema.template.json to config/schema.json and modify appropriately  
 
-### Installation
-- Sync this repository
-- Usage Installer Scripts or AMI
+### Defaults
+- Default Data structure: 
+```
+    {data_path}/csv
+    {data_path}/json
+    {data_path}/target
+```
 
-### AMI
-- TBD
+### Installation per AWS Instance
+1. Launch and Configure AWS Ubuntu 14.04 Server Instance
+2. Execute the following to update and obtain git
+``` sh
+sudo apt-get update -y
+sudo apt-get install git
+```
+3. copy ssh key from your github
+```
+scp -i ~/.ssh/<file.pem> ~/.ssh/id_rsa ubuntu@<IP>:/home/ubuntu/.ssh/id_rsa
+```
+4. clone the repository
+```sh
+# e.g. clone to $HOME/projects
+git clone git@github.com:techstarsiot/starterpacks.git
+```
+5. make soft links to cloned config directories
+```sh
+mkdir -p $HOME/config
+ln -s $HOME/projects/starterpacks/package.ml/anaconda/base/config/anaconda $HOME/config/anaconda
+ln -s $HOME/projects/starterpacks/package.ml/spark/2.2.0/config/spark $HOME/config/spark
+ln -s $HOME/projects/starterpacks/package.ml/installers $HOME/installers
+```
+6. run installers from $HOME/installers
+```sh
+sudo -s ./make_installers.sh
+```
+7. add configuration to your $HOME/.bashrc file and execute source the file
+```
+source $HOME/config/dotfiles/dotconfig_extensions
+source $HOME/.bashrc
+```
+- edit the configuration files in config directory {schema.json, credentials.yml} appropriately
+
+
 
 ### Usage
 ```sh
