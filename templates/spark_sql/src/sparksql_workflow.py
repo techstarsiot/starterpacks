@@ -42,14 +42,16 @@ if __name__ == "__main__":
     creds = ld.read_credentials()
 
     ### Setup Spark Session
-    warehouse_dir = "/tmp/spark-warehouse"
+    warehouse_dir = os.getenv('SPARK_WAREHOUSE_DIR')
     if not os.path.exists(warehouse_dir): os.makedirs(warehouse_dir)
+    
+    #config("spark.sql.warehouse.dir", warehouse_dir) \
     spark = SparkSession \
             .builder \
             .appName("PySpark SQL Benchmark Injection/Extraction") \
             .master(utils.acquire_url(utils.MODE_SPARK_LOCAL)) \
             .enableHiveSupport()   \
-            .config("spark.sql.warehouse.dir", warehouse_dir) \
+	    .config("spark.sql.warehouse.dir", warehouse_dir) \
             .config("fs.s3a.access.key", creds['aws_access_key_id'])   \
             .config("fs.s3a.secret.key", creds['aws_secret_access_key']) \
             .getOrCreate()
@@ -71,7 +73,7 @@ if __name__ == "__main__":
     if not args.bucketonly:
         evt_id = dbg.log_jobgroup(sc, evt_id, "Create SQL Tables")
         hive_table_name = "_".join([table_name, "hive"])
-        tbl.create_table(df, table_name)
+        tbl.create_table(spark, df, table_name, warehouse_dir)
 
         evt_id = dbg.log_jobgroup(sc, evt_id, "Create Hive Tables")
         tbl.create_hive_table(spark, table_name, hive_table_name, warehouse_dir)

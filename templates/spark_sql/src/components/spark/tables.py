@@ -2,10 +2,11 @@ import pandas as pd
 import json
 
 ### Create Tables/Hive Metastore
-def create_table(df_in, name, cache_state=True):
+def create_table(session, df_in, name, path_dir, cache_state=True):
     """
     creates a mapped table view of in memory table with appropriate cache
     """
+
     df_in.createOrReplaceTempView(name)                        #--- create table
     if cache_state: df_in.cache()                              #--- caches specified table in-memory
     #df_view = spark.table(name)
