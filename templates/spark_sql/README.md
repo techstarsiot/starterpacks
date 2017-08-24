@@ -5,7 +5,7 @@
 - Copy config/schema.template.json to config/schema.json and modify appropriately  
 
 ### Defaults
-- Default Data structure: 
+- Default Data structure:
 ```
     {data_path}/csv
     {data_path}/json
@@ -14,6 +14,11 @@
 
 ### Installation per AWS Instance
 1. Launch and Configure AWS Ubuntu 14.04 Server Instance
+```
+Open the following ports via Security Rules:
+    - 18080
+    - 4040
+```
 2. Execute the following to update and obtain git
 ``` sh
 sudo apt-get update -y
@@ -46,6 +51,9 @@ source $HOME/.bashrc
 ```
 - edit the configuration files in config directory {schema.json, credentials.yml} appropriately
 
+sudo chmod 777 /home/ubuntu/spark/meta/spark-warehouse
+mkdir /tmp/spark-events
+sudo ln -s /tmp/spark-events /home/ubuntu/spark/meta/spark-events/
 
 
 ### Usage
