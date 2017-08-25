@@ -1,9 +1,14 @@
+
+# stop history server first before creating events
+sudo -s  ${SPARK_HOME}/sbin/stop-history-server.sh
+
 # create spark directory for events and warehouse storage
-mkdir -p ${SPARK_WAREHOUSE_DIR}
-sudo chmod 777 ${SPARK_WAREHOUSE_DIR}
-mkdir -p /tmp/spark-events
-sudo ln -s /tmp/spark-events ${SPARK_EVENTS_DIR}
+USER_PERM=`echo $(logname)`
+sudo  -s mkdir -p ${SPARK_WAREHOUSE_DIR}
+sudo  -s chmod 777 ${SPARK_WAREHOUSE_DIR}
+mkdir -p ${SPARK_EVENTS_DIR}
+sudo  -s chown -R ${USER_PERM}:${USER_PERM} ${SPARK_META_DIR}
+sudo  -s chown ${USER_PERM}:${USER_PERM} ${SPARK_EVENTS_DIR}
 
 # start daemons
-sudo -s  ${SPARK_HOME}/sbin/stop-history-server.sh
 sudo -s  ${SPARK_HOME}/sbin/start-history-server.sh

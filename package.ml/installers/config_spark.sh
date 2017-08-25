@@ -20,10 +20,9 @@ export LD_LIBRARY_PATH=${HADOOP_HOME}/lib/native/:$LD_LIBRARY_PATH
 export HIVE_HOME=${EXTERNAL_DEST_DIR}/apache-hive-$HIVE_VERSION-bin
 
 # setup to create temporary directories on boot, needs to match spark-defaults
-# to minimize storage, this is done on boot but can be modified via spark-defaults
-export SPARK_META_DIR=$HOME/spark/meta
+export SPARK_META_DIR=$HOME/spark_meta/
 export SPARK_WAREHOUSE_DIR=$SPARK_META_DIR/spark-warehouse
-export SPARK_EVENTS_DIR=${SPARK_META_DIR}/spark-events
+export SPARK_EVENTS_DIR=/tmp/spark-events
 
 # setup PATH environments
 export PATH=${SPARK_HOME}/bin:$PATH
