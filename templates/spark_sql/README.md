@@ -1,9 +1,5 @@
 ## Spark SQL In-Memory Cache Benchmark
 
-### Pre-Requisites
-- Copy config/credentials.template.yml to config/credentials.yml and fill in AWS Credentials
-- Copy config/schema.template.json to config/schema.json and modify appropriately  
-
 ### Defaults
 - Default Data structure:
 ```
@@ -18,6 +14,8 @@
 Open the following ports via Security Rules:
     - 18080
     - 4040
+    - 8888  (Jupyter Notebook)
+    - 22    (SSH)
 ```
 2. Execute the following to update and obtain git
 ``` sh
@@ -42,7 +40,7 @@ ln -s $HOME/projects/starterpacks/package.ml/installers $HOME/installers
 ```
 6. run installers from $HOME/installers
 ```sh
-sudo -s ./make_installers.sh
+sudo -s ./make_install.sh
 ```
 7. add configuration to your $HOME/.bashrc file and execute source the file
 ```
@@ -50,10 +48,9 @@ source $HOME/config/dotfiles/dotconfig_extensions
 source $HOME/.bashrc
 ```
 - edit the configuration files in config directory {schema.json, credentials.yml} appropriately
+    - Copy config/credentials.template.yml to config/credentials.yml and fill in AWS Credentials
+    - Copy config/schema.template.json to config/schema.json and modify appropriately  
 
-sudo chmod 777 /home/ubuntu/spark/meta/spark-warehouse
-mkdir /tmp/spark-events
-sudo ln -s /tmp/spark-events /home/ubuntu/spark/meta/spark-events/
 
 
 ### Usage
@@ -61,7 +58,7 @@ sudo ln -s /tmp/spark-events /home/ubuntu/spark/meta/spark-events/
 # perform in-memory cache + write/read back from S3 + convert to Pandas
 # override default name of output directory/file to S3
 # override default path to S3 (S3a)
-spark-submit sparksql_workflow.py -bn techstars.iot.dev -bp data
+spark-submit sparksql_workflow.py -bn techstars.iot.dev -bp data --appname "Benchmark.experiment.001"
 ```
 
 ```sh
@@ -89,13 +86,18 @@ spark-submit sparksql_workflow.py --src "s3a://techstars.iot.dev/data/csv/<file 
 
 #### limitations
 - Singleton `Session Context`, for multiple contexts - requires database per metastore hive table
-
+- History Server permissions to view remotely - reference below
 
 ### Spark UI
 - For currently active executing program (hence blocking program from finishing)
-- http://localhost:4040
+- http://<IP>:4040
 
 ### History Server
-- For viewing actively running sessions and past sessions
+- For viewing actively running sessions and past sessions (identified by app id and name)
+- You will have to edit the permissions as you generate new history logs to view remotely,
+since we are not running with a dedicated `spark user and group`.  Possibly with a cron job.
+```sh
+sudo chmod +r -R /tmp/spark-events/
+```
 - Execute `$SPARK_HOME/sbin/start-history-server.sh` at command line (if not already started, dotfiles start by default)
-- http://localhost:18080
+- http://<IP>:18080
