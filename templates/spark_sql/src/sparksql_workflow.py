@@ -18,7 +18,7 @@ import components.spark.aws         as aws
 
 
 if __name__ == "__main__":
-    default_targetname = 'target_sample'
+    default_targetname  = 'target_sample'
     default_bucket_name = 'techstars.iot.dev'
 
     default_bucket_path = 'data'
@@ -27,12 +27,17 @@ if __name__ == "__main__":
 
     # parse script
     parser = argparse.ArgumentParser(description="spark sql workflow")
-    parser.add_argument('-bo',   '--bucketonly',        action="store_true", default=False, help='performs only s3 path')
+   
+    parser.add_argument('-app',  '--appname',		    default="benchmark.exp.001",   nargs='?', help='application name')
     parser.add_argument('-tgt',  '--target',            default=default_targetname,    nargs='?', help='associated target output')
     parser.add_argument('-bn',   '--bucketname',        default=default_bucket_name,   nargs='?', help='default s3 I/O name')
     parser.add_argument('-bp',   '--bucketpath',        default=default_bucket_path,   nargs='?', help='associated bucketpath')
     parser.add_argument('--src',                        default=default_src_path,      nargs='?', help='associated src path or file')
     parser.add_argument('--sql',                        default="",                    nargs='?', help='performs simple sql queries')
+    parser.add_argument('-mem',  '--memory',            default="6g",                  nargs='?', help='spark driver memory')
+    parser.add_argument('-bo',   '--bucketonly',        action="store_true", default=False, help='performs only s3 path')
+    parser.add_argument('-tr',   '--transform',         action="store_true", default=False, help='performs transform to pandas')
+
     args = parser.parse_args()
     print(args)
 
@@ -48,16 +53,16 @@ if __name__ == "__main__":
     #config("spark.sql.warehouse.dir", warehouse_dir) \
     spark = SparkSession \
             .builder \
-            .appName("PySpark SQL Benchmark Injection/Extraction") \
+            .appName(args.appname) \
             .master(utils.acquire_url(utils.MODE_SPARK_LOCAL)) \
             .enableHiveSupport()   \
-	    .config("spark.sql.warehouse.dir", warehouse_dir) \
+	        .config("spark.sql.warehouse.dir", warehouse_dir) \
+            .config("spark.driver.memory", args.memory) \
             .config("fs.s3a.access.key", creds['aws_access_key_id'])   \
             .config("fs.s3a.secret.key", creds['aws_secret_access_key']) \
             .getOrCreate()
     sc = spark.sparkContext
     print("Spark Version: {}".format(spark.version))
-
 
     ### Load data and Create Spark Schema
     evt_id = 0
@@ -92,10 +97,11 @@ if __name__ == "__main__":
     #df_reload.select('speed', 'altitude').describe().show(5)
 
     ### Convert to normal python usage: occurs by action, no lazy operations
-    evt_id = dbg.log_jobgroup(sc, evt_id, "Transform to Pandas DF")
-    df_pandas = df_reload.toPandas()
-    print(df_pandas.head())
-
+    # assumes the data is small enough to graph the entire data in memory 
+    if args.transform:
+        evt_id = dbg.log_jobgroup(sc, evt_id, "Transform to Pandas DF")
+        df_pandas = df_reload.toPandas()
+        print(df_pandas.head())
 
     ### Perform SQL Aggregations
     if not args.bucketonly and args.sql:
@@ -107,6 +113,6 @@ if __name__ == "__main__":
         pprint(df_json, indent=4)
 
     ### Per debugging
-    evt_id = dbg.log_jobgroup(sc, evt_id, "Blocking Debug Loop")
-    while(1):pass
+    #evt_id = dbg.log_jobgroup(sc, evt_id, "Blocking Debug Loop")
+    #while(1):pass
     spark.stop()

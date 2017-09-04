@@ -1,5 +1,8 @@
 import pandas as pd
 import json
+import os 
+
+from pyspark import StorageLevel
 
 ### Create Tables/Hive Metastore
 def create_table(session, df_in, name, path_dir, cache_state=True):
@@ -7,20 +10,21 @@ def create_table(session, df_in, name, path_dir, cache_state=True):
     creates a mapped table view of in memory table with appropriate cache
     """
 
-    df_in.createOrReplaceTempView(name)                        #--- create table
-    if cache_state: df_in.cache()                              #--- caches specified table in-memory
-    #df_view = spark.table(name)
+    df_in.createOrReplaceTempView(name)                         #--- create table
+    if cache_state:
+        df_in.persist(StorageLevel.MEMORY_ONLY_SER)             #--- serializes caches, and spills to disk
 
 def create_hive_table(session, name, hive_name, path_dir, cache_state=True):
     """
     create mapped table in hive metastore
     """
-    session.sql("DROP TABLE IF EXISTS {}".format(hive_name))     #--- remove existing same table in hive
+    session.sql("DROP TABLE IF EXISTS {}".format(hive_name))    #--- remove existing same table in hive
     session.table(name) \
-           .write.option("path", path_dir) \
-           .saveAsTable(hive_name)                               #--- save in hive metastore to make queries
-    if cache_state: session.catalog.cacheTable(hive_name)        #--- caches in hive metastore
-
+           .write  \
+           .saveAsTable(hive_name)                              #--- save in hive metastore to make queries
+    if cache_state: session.catalog.cacheTable(hive_name)       #--- caches in hive metastore
+    print("Saving table to: {}".format(path_dir))
+    
 
 def evict_cache(session, name, hive_name=None, evict_all=False):
     """

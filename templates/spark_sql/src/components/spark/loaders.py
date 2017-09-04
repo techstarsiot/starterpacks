@@ -64,3 +64,10 @@ def read_data(session, fname, schema_fmt, null_val, fmt='csv'):
         .schema(schema_fmt) \
         .load(fname)
     return df
+
+def sample_pct(df_full, df_sample):
+    """
+    return the sample percentage from the overall frame
+    """    
+    return df_sample.count()/df_full.count()
+
