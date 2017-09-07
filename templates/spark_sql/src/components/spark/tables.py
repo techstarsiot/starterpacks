@@ -22,7 +22,10 @@ def create_hive_table(session, name, hive_name, path_dir, cache_state=True):
     session.table(name) \
            .write  \
            .saveAsTable(hive_name)                              #--- save in hive metastore to make queries
-    if cache_state: session.catalog.cacheTable(hive_name)       #--- caches in hive metastore
+                                                                #--- caches in hive metastore
+    if cache_state: 
+        session.table(hive_name).persist(StorageLevel.MEMORY_ONLY_SER) 
+   
     print("Saving table to: {}".format(path_dir))
     
 

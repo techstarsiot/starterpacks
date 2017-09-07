@@ -35,9 +35,9 @@ if __name__ == "__main__":
     parser.add_argument('--src',                        default=default_src_path,      nargs='?', help='associated src path or file')
     parser.add_argument('--sql',                        default="",                    nargs='?', help='performs simple sql queries')
     parser.add_argument('-mem',  '--memory',            default="6g",                  nargs='?', help='spark driver memory')
-    parser.add_argument('-bo',   '--bucketonly',        action="store_true", default=False, help='performs only s3 path')
+    parser.add_argument('-tab',  '--table',             action="store_true", default=False, help='perform only table transactions')
+    parser.add_argument('-bkt',  '--bucket',            action="store_true", default=False, help='performs only s3 path')    
     parser.add_argument('-tr',   '--transform',         action="store_true", default=False, help='performs transform to pandas')
-
     args = parser.parse_args()
     print(args)
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     ### Setup Tables and Hive Metastore spark warehouse
     target_path = os.path.join(args.bucketpath, 'target')
-    if not args.bucketonly:
+    if args.table:
         evt_id = dbg.log_jobgroup(sc, evt_id, "Create SQL Tables")
         hive_table_name = "_".join([table_name, "hive"])
         tbl.create_table(spark, df, table_name, warehouse_dir)
@@ -85,16 +85,17 @@ if __name__ == "__main__":
         df_dbs, df_tables, table_cache_states = tbl.get_info(spark, table_name, hive_table_name)
         #evict_cache(table_name, hive_table_name)
 
+    if args.bucket:
         # Use S3 as Persistent Storage - decouple Compute/Storage by using S3 as data layer
         evt_id = dbg.log_jobgroup(sc, evt_id, "Write to S3 Bucket")
         aws.write_s3bucket(spark, df, bucket_name=args.bucketname, bucket_path=target_path, target=args.target)
         print("S3 Write Operations Complete")
 
-    ### Read from S3 Bucket
-    evt_id = dbg.log_jobgroup(sc, evt_id, "Read from S3 Bucket")
-    df_reload = aws.read_s3bucket(spark, bucket_name=args.bucketname, bucket_path=target_path, target=args.target)
-    print("S3 Read Operations Complete")
-    #df_reload.select('speed', 'altitude').describe().show(5)
+        ### Read from S3 Bucket
+        evt_id = dbg.log_jobgroup(sc, evt_id, "Read from S3 Bucket")
+        df_reload = aws.read_s3bucket(spark, bucket_name=args.bucketname, bucket_path=target_path, target=args.target)
+        print("S3 Read Operations Complete")
+        #df_reload.select('speed', 'altitude').describe().show(5)
 
     ### Convert to normal python usage: occurs by action, no lazy operations
     # assumes the data is small enough to graph the entire data in memory 
@@ -104,7 +105,7 @@ if __name__ == "__main__":
         print(df_pandas.head())
 
     ### Perform SQL Aggregations
-    if not args.bucketonly and args.sql:
+    if args.sql:
         ### Perform example SQL Statements
         evt_id = dbg.log_jobgroup(sc, evt_id, "Query SQL Statement")
         df_pandas, df_json = tbl.sql_query(spark, args.sql, table_name)

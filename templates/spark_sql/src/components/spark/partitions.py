@@ -5,6 +5,8 @@ from pyspark.sql.functions import to_date
 from pyspark import StorageLevel
 
 import os
+import tarfile
+
 
 def create_file_partitions(df, target_path, *partition_id, repartition=False):
     """
@@ -46,15 +48,34 @@ def export_table_partitions(session, input_table, target_path, format_ext, *part
     """
     col_und  = lambda s: "_" + s
     k1, k2   = col_und(partition_id[0]), col_und(partition_id[1])
-    df_table = session.table(input_table).persist(StorageLevel.MEMORY_AND_DISK_SER)
+    df_table = session.table(input_table).persist(StorageLevel.MEMORY_ONLY_SER)
     df_table_fmt = df_table.withColumn(k1, df_table[partition_id[0]]).withColumn(k2, df_table[partition_id[1]])
     
-    df_table_fmt.repartition(k1, k2)    \
-            .write.partitionBy(k1, k2)  \
-            .option('header', True)     \
-            .mode('overwrite')          \
-            .format(format_ext)         \
-            .save(target_path)
+    df_writer = df_table_fmt                \
+                .repartition(k1, k2)        \
+                .write.partitionBy(k1, k2)  \
+                .option('header', True)     \
+                .mode('overwrite')          \
+                .format(format_ext)
+
+    # save to local path
+    df_writer.save(target_path)
+    # save compressed
+    #df_writer.option("codec", "org.apache.hadoop.io.compress.GzipCodec") \
+    #         .save(target_path + '.csv.gz')
+
+
+
+def archive_table_partitions(src_path, src_root, tar_name):
+    """
+    tar up given file source to directory
+    """
+    base_dir = os.path.basename(src_path)
+    dest_name = os.path.join(src_root, tar_name)
+    with tarfile.open(dest_name, "w:gz") as archive:
+        archive.add(src_path, arcname=base_dir,  recursive=True, 
+                    exclude=lambda fn: '.crc' in os.path.splitext(fn)[-1])
+    
 
 def query(session, target_path, format_ext, items):
     """
