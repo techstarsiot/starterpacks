@@ -75,7 +75,7 @@ and cannot be done in Apache Spark.  As well from an architectural standpoint,
 it is more suited to do so.
 
 This is just an initial version, as performance can be increased by having
-smarter *grouping* of metadata url's, rather than *individual* urls.  In this manner 
+smarter *grouping* of metadata url's, rather than *individual* urls.  In this manner
 it can be loaded into partitions in a higher performing method, rather than
 one-by-one.
 
@@ -103,7 +103,9 @@ spark-submit sparksql_loadmeta.py
 
 ### Spark UI
 - For currently active executing program (hence blocking program from finishing)
-- http://<IP>:4040
+```
+http://<IP ADDRESS>:4040
+```
 
 ### History Server
 - For viewing actively running sessions and past sessions (identified by app id and name)
@@ -113,4 +115,6 @@ since we are not running with a dedicated `spark user and group`.  Possibly with
 sudo chmod +r -R /tmp/spark-events/
 ```
 - Execute `$SPARK_HOME/sbin/start-history-server.sh` at command line (if not already started, dotfiles start by default)
-- http://<IP>:18080
+```
+http://<IP ADDRESS>:18080
+```
