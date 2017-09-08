@@ -34,7 +34,7 @@ if __name__ == "__main__":
     default_bucket_path = 'ckpts'
     default_targetname  = 'partitions'
     default_tablename   = 'crunch_partitions'
-    default_src_root    = '/volumes/techstars/ckpts'
+    default_src_root    = '../ckpts'
     default_keys        = "registration, datetime"
     default_queries     = "PH-GGY, 2017-07-30"
 
@@ -101,6 +101,7 @@ if __name__ == "__main__":
     df_flt = df_flt.withColumn(part_keys[1], to_date(part_keys[1], "yyyy-MM-dd"))
     df_flt.persist(StorageLevel.MEMORY_ONLY_SER)
 
+    if not os.path.exists(args.srcroot): os.makedirs(args.srcroot)
     partitions_path = os.path.join(args.srcroot, args.target)
     tar_name = ".".join([table_name, 'tar.gz'])
     tar_wr_archives = os.path.join(args.srcroot, "archives")
