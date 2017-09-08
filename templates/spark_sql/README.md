@@ -65,8 +65,28 @@ spark-submit sparksql_partitions.py
 -tbl "partition_mgr"
 -src "/volumes/techstars/ckpts"
 -tgt "partitions"
---appname "Benchmark.experiment.001"
+--appname "Benchmark.partitions.001"
 ```
+
+Script: sparksql_loadmeta.py
+Performs loading binary blob metadata loading per an according url (e.g. S3),
+as no binary data should be stored in a relational database nor a DataFrame,
+and cannot be done in Apache Spark.  As well from an architectural standpoint,
+it is more suited to do so.
+
+This is just an initial version, as performance can be increased by having
+smarter *grouping* of metadata url's, rather than *individual* urls.  In this manner 
+it can be loaded into partitions in a higher performing method, rather than
+one-by-one.
+
+```sh
+spark-submit sparksql_loadmeta.py
+-bn  "techstars.iot.dev"
+-bp  "ckpts"
+-mem "20g"
+--appname "Benchmark.metadata.001"
+```
+
 
 
 #### Benchmarks
