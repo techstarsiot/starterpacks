@@ -9,6 +9,7 @@ from pprint import pprint
 from pyspark.sql  import SparkSession
 from pyspark.conf import SparkConf
 from pyspark.sql  import Row
+from pyspark      import StorageLevel
 
 import components.spark.loaders     as ld
 import components.spark.utils       as utils
@@ -75,9 +76,9 @@ if __name__ == "__main__":
 
     ### Setup Tables and Hive Metastore spark warehouse
     target_path = os.path.join(args.bucketpath, 'target')
+    hive_table_name = "_".join([table_name, "hive"])
     if args.table:
         evt_id = dbg.log_jobgroup(sc, evt_id, "Create SQL Tables")
-        hive_table_name = "_".join([table_name, "hive"])
         tbl.create_table(spark, df, table_name, warehouse_dir)
 
         evt_id = dbg.log_jobgroup(sc, evt_id, "Create Hive Tables")
@@ -88,7 +89,8 @@ if __name__ == "__main__":
     if args.bucket:
         # Use S3 as Persistent Storage - decouple Compute/Storage by using S3 as data layer
         evt_id = dbg.log_jobgroup(sc, evt_id, "Write to S3 Bucket")
-        aws.write_s3bucket(spark, df, bucket_name=args.bucketname, bucket_path=target_path, target=args.target)
+        df_tbl = spark.table(hive_table_name).persist(StorageLevel.MEMORY_ONLY_SER)
+        aws.write_s3bucket(spark, df_tbl, bucket_name=args.bucketname, bucket_path=target_path, target=args.target)
         print("S3 Write Operations Complete")
 
         ### Read from S3 Bucket
