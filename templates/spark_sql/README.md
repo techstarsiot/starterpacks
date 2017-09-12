@@ -1,7 +1,6 @@
 ## Spark SQL In-Memory Cache Benchmark
 The following modules and scripts represent a way to benchmark your
-stages of the pipeline using a distributed technology, e.g. Apache Spark
-via Spark SQL and DataFrames.
+stages of the pipeline using a distributed technology, e.g. Apache Spark via Spark SQL and DataFrames.
 
 
 ### Defaults
@@ -34,18 +33,24 @@ performs transactions to write/read S3.
 # -bp:  overrides default bucket path to use
 # -tr:  for transforms to pandas and json (assuming data is small enough in memory)
 
+
 spark-submit sparksql_workflow.py -mem 20g -tab -bkt
 -tgt "sample_target"
 -bn  "techstars.iot.dev"
 -bp  "data"
 -mem "20g"
+-tab
 --appname "Benchmark.experiment.001"
 --src "s3a://techstars.iot.dev/data/sample_data.csv"
 ```
 
+This `tab` option is used to generate the initial hive tables.  After the initial tables are created (and are not needed to be updated), this option is no longer required.
+
+As noted above, theh `bkt` option is used to take information from the hive table and to write and read back from S3.
+
+
 Script: sparksql_partitions.py
-Performs Partitioning based on given keys from hive metastore table to
-store locally on disk, create an archived file and write/read to S3.
+Performs Partitioning based on given keys from hive metastore table to store locally on disk, create an archived file and write/read to S3.
 
 
 
@@ -69,15 +74,9 @@ spark-submit sparksql_partitions.py
 ```
 
 Script: sparksql_loadmeta.py
-Performs loading binary blob metadata loading per an according url (e.g. S3),
-as no binary data should be stored in a relational database nor a DataFrame,
-and cannot be done in Apache Spark.  As well from an architectural standpoint,
-it is more suited to do so.
+Performs loading binary blob metadata loading per an according url (e.g. S3), as no binary data should be stored in a relational database nor a DataFrame, and cannot be done in Apache Spark.  As well from an architectural standpoint, it is more suited to do so.
 
-This is just an initial version, as performance can be increased by having
-smarter *grouping* of metadata url's, rather than *individual* urls.  In this manner
-it can be loaded into partitions in a higher performing method, rather than
-one-by-one.
+This is just an initial version, as performance can be increased by having smarter *grouping* of metadata url's, rather than *individual* urls.  In this manner it can be loaded into partitions in a higher performing method, rather than one-by-one.
 
 ```sh
 spark-submit sparksql_loadmeta.py

@@ -1,8 +1,9 @@
 ### Public AMI
 
-1. Clone/Launch Techstars Public AMI
+1. Clone/Launch Techstars Public AMI (AMI's are Region Specific)
 ```
-AMI ID: ami-0c908c77
+AMI ID: ami-0c908c77            (us-east-1)
+Canada AMI ID: ami-20d16844     (ca-central-1)
 ```
 
 2. ssh login (without pem file )
@@ -54,3 +55,26 @@ source $HOME/.bashrc
 - edit the configuration files in config directory {schema.json, credentials.yml} appropriately
     - Copy config/credentials.template.yml to config/credentials.yml and fill in AWS Credentials
     - Copy config/schema.template.json to config/schema.json and modify appropriately from the template  
+
+
+### For S3 Buckets based out of different regions (e.g. ca-central-1)
+Per the following jar file `com.amazonaws_aws-java-sdk-1.7.4.jar`:
+- Modify the awssdk_config_default.json  `signerType` field from `S3SignerType`, to `AWSS3V4SignerType`.
+
+```
+{
+    "key" : "s3",
+    "config" : {
+    "signerType" : "AWSS3V4SignerType"
+}
+```
+
+1. cd ~/.ivy2/jars
+2. jar xf com.amazonaws_aws-java-sdk-1.7.4.jar awssdk_config_default.json
+3. vi awssdk_config_default.json (edit per `signerType` as above)
+4. jar xf com.amazonaws_aws-java-sdk-1.7.4.jar awssdk_config_default.json
+5. rm ~/.ivy2/jars/awssdk_config_default.json
+6. rm -r ~/.ivy2/cache
+
+
+- Additionally you may find that you need to modify the [endpoint](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) configuration.

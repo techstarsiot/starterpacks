@@ -1,1 +1,13 @@
+# Avoid pushing your Credentials #
+######################
+templates/config/credentials.yml
+
+# Python generated files #
+######################
+__pycache__
+
+# OS generated files #
+######################
 .DS_Store
+.DS_Store?
+.Trashes
