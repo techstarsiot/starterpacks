@@ -1,6 +1,6 @@
 # Avoid pushing your Credentials #
 ######################
-templates/config/credentials.yml
+templates/spark_sql/config/credentials.yml
 
 # Python generated files #
 ######################
